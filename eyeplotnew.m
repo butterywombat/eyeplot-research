@@ -97,10 +97,14 @@ time = data(:,1); %update time, using as a contant name convenience only
 %%
 %plotting options...
 %TODO: make the last 2 options the default...
-menu_options = {'1)time [s]' '2)horiz (left-right) [deg]' '3)vert (up-down) [deg]' '4)tor (CW-CCW) [deg]' '5)horiz_v [deg/s]' '6)vert_v [deg/s]'  '7)tor_v [deg/s]' '8)horiz-vert-tor vs time' '9)horiz-vert vs tor (primary gaze)'}; %TODO: deal with velocities.
+%menu_options = {'1)time [s]' '2)horiz (left-right) [deg]' '3)vert (up-down) [deg]' '4)tor (CW-CCW) [deg]' '5)horiz_v [deg/s]' '6)vert_v [deg/s]'  '7)tor_v [deg/s]' '8)horiz-vert-tor vs time' '9)horiz-vert vs tor (primary gaze)'}; %TODO: deal with velocities.
+%defaults will be plotted anyway. show a menu 
+menu_options = {'1)time [s]' '2)horiz (left-right) [deg]' '3)vert (up-down) [deg]' '4)tor (CW-CCW) [deg]' '5)horiz_v [deg/s]' '6)vert_v [deg/s]'  '7)tor_v [deg/s]' '8)skip (plots defaults--h,v,t vs time and h,v vs tor)'};
+
 chosen_x = menu('Choose an x', menu_options);
 chosen_y = [];
 
+%setup x values to plot
 switch chosen_x
     case 0
         disp('User selected Cancel')
@@ -115,49 +119,61 @@ switch chosen_x
     case {5,6,7} %velocity chosen
         x_left = v(:,chosen_x-4); %ex: choosing choice 5=horiz_v, so look at 5-4=1st col in v for left
         x_right = v(:,chosen_x-1); %and 4th col for right eye
-    case 8
-        x_left = data(:,1);
-        x_right = x_left;
-        disp('User choose horiz,vert,tor vs time');
+        
+        %%TODO: move this elsewhere--cuz only happens if ONLY select
+        %%default.  must happen all the time anyway at some point.
+    case 8 %for hvt vs t initially. must change for tor stuff later.
+        x_left = time; 
+        x_right = xleft;
         chosen_y = 1:3;
-    case 9
-        x_left = data(:,4); %tor
-        x_right = data(:,7);
-        disp('User choose horiz, vert vs tor');
-        chosen_y = 1:2;
 end
 
-if (isempty(chosen_y)) %if it's not a special case, show y menu
+%if (isempty(chosen_y)) %if it's not plot defaults only, show y menu.
+if chosen_x ~= 8 %if x is not special case plot, show y menu.
     chosen_y = menu('Choose a y', menu_options(2:7)); %I left out time as a choice for y, so menu_options start at col 2.
-    %choice 1 = horiz, 2 = vert, 3 = tor, 4 = horiz v, 5 = vert v, 6 = tor v, 7 = hvt-t, 8 = hv-t
+    %choice 1 = horiz, 2 = vert, 3 = tor, 4 = horiz v, 5 = vert v, 6 = tor
     if (chosen_y == 0)
-      disp('User selected Cancel')
-       return
+      disp('User selected Cancel');
+      return;
     end
 end
-
+   
 %%
-%gets the y data sets for later plotting
-if (chosen_y < 4) %ie 'position' rather than velocity etc picked as y
-    y_left = data(:,chosen_y+1); %since 'time' choice is left out for y, add 1 to correlate with right column in data matrix; thus choice 1 for y correlates to col 2 in data cols
-    y_right = data(:,chosen_y+4); %yleft col + 3 correlates with the same y value type but for right eye instead of left
-else %velocity picked as y
-    y_left = v(:,chosen_y-3); %ex: choose choice 4 = horiz v, thus gets 4-3=1st col of v (left horiz v)
-    y_right = v(:,chosen_y); %ex: 4th choice = 4th col of v (right horiz v)
+    %gets the y data sets for later plotting, for non-special cases.
+    if (chosen_y < 4) %ie 'position' rather than velocity etc picked as y
+        y_left = data(:,chosen_y+1); %since 'time' choice is left out for y, add 1 to correlate with right column in data matrix; thus choice 1 for y correlates to col 2 in data cols
+        y_right = data(:,chosen_y+4); %yleft col + 3 correlates with the same y value type but for right eye instead of left
+    else %velocity picked as y
+        y_left = v(:,chosen_y-3); %ex: choose choice 4 = horiz v, thus gets 4-3=1st col of v (left horiz v)
+        y_right = v(:,chosen_y); %ex: 4th choice = 4th col of v (right horiz v)
+    end
+    
+    %plot and save figure
+    plot(x_left, y_left(:,1), 'b.', x_right, y_right(:,1), 'r.');
+    axis tight; %rescale axes
+    x_axis = menu_options(chosen_x);
+    xlabel(x_axis);
+    y_axis = menu_options(chosen_y+1); %+1 since menu options still includes time first.
+    ylabel(y_axis);
+    h = strcat(filename, ': ', y_axis, '-vs-', x_axis);
+    title(h);
+    hline(0,'k-'); %need the hline and vline .m function files
+    vline(0,'k-');
+    print(strcat(pathname, 'figure', num2str(i)),'-dtiff','-r300');
+%csvwrite('filtered_data.csv',data);
 end
-
-
 %%
-%plot and save figure
-for i=1:length(chosen_y) %"for all the chosen y's". this is to handle those two special cases. y_left length will be 1 if not hvt-t, will be 3 if it is. if it's 3, then loop through to draw multiple plots
+%always plot and save figures for all the default graphs
+for i=1:3 %"for all the chosen y's". this is to handle those two special cases. y_left length will be 1 if not hvt-t, will be 3 if it is. if it's 3, then loop through to draw multiple plots   
     %subplot(3,1,i); 
-    plot(x_left, y_left(:,i), 'b.', x_right, y_right(:,i), 'r.');
+    plot(x_time, y_left(:,i), 'b.', x_right, y_right(:,i), 'r.');
     switch chosen_x
         case 8
             chosen_x = 1; %for time label
         case 9
             chosen_x = 4; %for tor label
     end
+    axis tight; %rescale axes
     x_axis = menu_options(chosen_x);
     xlabel(x_axis);
     y_axis = menu_options(chosen_y(i)+1); %+1 since menu options still includes time first.
