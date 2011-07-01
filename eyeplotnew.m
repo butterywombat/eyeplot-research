@@ -129,16 +129,13 @@ end
 %         chosen_y = 1:3;
 
 %if (isempty(chosen_y)) %if it's not plot defaults only, show y menu.
-if chosen_x ~= 8 %if x is not special case plot, show extra plot y menu.
+if chosen_x ~= 8 %if x is not special case plot, show extra plot y menu and then plot/save.
     chosen_y = menu('Choose a y', menu_options(2:7)); %I left out time as a choice for y, so menu_options start at col 2.
     %choice 1 = horiz, 2 = vert, 3 = tor, 4 = horiz v, 5 = vert v, 6 = tor
     if (chosen_y == 0)
       disp('User selected Cancel');
       return;
     end
-end
-
-%%
     %gets the y data sets for later plotting, for extra graph
     if (chosen_y < 4) %ie 'position' rather than velocity etc picked as y
         y_left = data(:,chosen_y+1); %since 'time' choice is left out for y, add 1 to correlate with right column in data matrix; thus choice 1 for y correlates to col 2 in data cols
@@ -147,7 +144,6 @@ end
         y_left = v(:,chosen_y-3); %ex: choose choice 4 = horiz v, thus gets 4-3=1st col of v (left horiz v)
         y_right = v(:,chosen_y); %ex: 4th choice = 4th col of v (right horiz v)
     end
-    
     %plot and save figure
     plot(x_left, y_left(:,1), 'b.', x_right, y_right(:,1), 'r.');
     axis tight; %rescale axes
@@ -161,7 +157,7 @@ end
     vline(0,'k-');
     print(strcat(pathname, 'extra figure'),'-dtiff','-r300');
 %csvwrite('filtered_data.csv',data);
-%end
+end
 
 %%
 %for defaults set hardcoded for now
@@ -179,6 +175,16 @@ else %velocity picked as y
 end
 for k = 1:3
     plot(x_left, y_left(:,k), 'b.', x_right, y_right(:,k), 'r.');
+    axis tight; %rescale axes
+    x_axis = menu_options(1); %time label
+    xlabel(x_axis);
+    y_axis = menu_options(k+1); %+1 since menu options still includes time first.
+    ylabel(y_axis);
+    h = strcat(filename, ': ', y_axis, '-vs-', x_axis);
+    title(h);
+    hline(0,'k-'); %need the hline and vline .m function files
+    vline(0,'k-');
+    print(strcat(pathname, 'position-vs-time', num2str(k)),'-dtiff','-r300');
 end
 
 %%
@@ -198,16 +204,7 @@ end
 %         case 9
 %             chosen_x = 4; %for tor label
 %     end
-axis tight; %rescale axes
-x_axis = menu_options(1); %time label
-xlabel(x_axis);
-y_axis = menu_options(k+1); %+1 since menu options still includes time first.
-ylabel(y_axis);
-h = strcat(filename, ': ', y_axis, '-vs-', x_axis);
-title(h);
-hline(0,'k-'); %need the hline and vline .m function files
-vline(0,'k-');
-print(strcat(pathname, 'figure', num2str(k)),'-dtiff','-r300');
+
 %csvwrite('filtered_data.csv',data);
 %%
 %begin saving data (data table)
