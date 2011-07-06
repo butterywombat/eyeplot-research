@@ -36,12 +36,23 @@ switch logical(true)
     case thres==0
         disp('No suppression')
     case thres>0
-        disp('blink suppression')
+        disp('Blink suppression')
         rows_to_remove = any(abs(v)>=thres, 2); %this records the rows that we want to remove for blink suppression! important
         v(rows_to_remove,:) = [];
         data(rows_to_remove,:) = [];
     otherwise
-        disp('Unknown method.')
+        disp('No suppression')
+end
+
+%%
+%saccade threshold
+thres = input('Please input saccade threshold in deg/s (0 for none).  Anything above this will be counted as a saccade. ');
+    
+switch logical(true)
+    case thres>0
+        disp('Saccade threshold entered.')
+    otherwise
+        disp('Default of 10 deg/s used.')
 end
 %%
 %CONSTANTSish...why doesn't matlab have constants?
@@ -66,7 +77,7 @@ time = data(:,1);
 
 %%
 %time bracketing
-h = plot(time, data(:,2:4), 'b.', time, data(:,5:7), 'r.'); %plots all on one graph just for time bracketing purposes
+h = plot(time, data(:,2:4), 'b-', time, data(:,5:7), 'r-'); %plots all on one graph just for time bracketing purposes
 hline(0,'k-'); %need the hline and vline .m function files
 vline(0,'k-');
 title({'Time Bracket';'Click left bound. Hit Enter. Click right bound. Hit Enter. Press enter twice to avoid time bracketing.'});
@@ -82,10 +93,10 @@ if (isempty(time1) || time1 <= 0 || time1 > time(length(time)) || time1 <= time0
 end
 
 %find closest time points to those selected
-idx0 = interp1(time,1:numel(time),time0,'nearest') ;
-time0 = time(idx0)
-idx1 = interp1(time,1:numel(time),time1,'nearest') ;
-time1 = time(idx1)
+idx0 = interp1(time,1:numel(time),time0,'nearest');
+time0 = time(idx0);
+idx1 = interp1(time,1:numel(time),time1,'nearest');
+time1 = time(idx1);
 
 %close(h);
 
@@ -100,6 +111,7 @@ pathname = strcat(pathname,'figures/');
 if(~exist(pathname))
     mkdir(pathname);
 end
+
 %%
 %plotting options for an extra user-specified plot
 %TODO: make the last 2 options the default...
@@ -150,7 +162,7 @@ if chosen_x ~= 8 %if x is not special case plot, show extra plot y menu and then
         y_right = v(:,chosen_y); %ex: 4th choice = 4th col of v (right horiz v)
     end
     %plot and save figure
-    plot(x_left, y_left(:,1), 'b.', x_right, y_right(:,1), 'r.');
+    plot(x_left, y_left(:,1), 'b-', x_right, y_right(:,1), 'r-');
     axis tight; %rescale axes
     x_axis = menu_options(chosen_x);
     xlabel(x_axis);
@@ -183,7 +195,7 @@ else %velocity picked as y
     y_right = v(:,chosen_y); %ex: 4th choice = 4th col of v (right horiz v)
 end
 for k = 1:3
-    plot(x_left, y_left(:,k), 'b.', x_right, y_right(:,k), 'r.');
+    plot(x_left, y_left(:,k), 'b-', x_right, y_right(:,k), 'r-');
     axis tight; %rescale axes
     x_axis = menu_options(1); %time label
     xlabel(x_axis);
@@ -215,7 +227,7 @@ else %velocity picked as y
     y_right = v(:,chosen_y); %ex: 4th choice = 4th col of v (right horiz v)
 end
 for k = 1:3
-    plot(x_left, y_left(:,k), 'b.', x_right, y_right(:,k), 'r.');
+    plot(x_left, y_left(:,k), 'b-', x_right, y_right(:,k), 'r-');
     axis tight; %rescale axes
     x_axis = menu_options(1); %time label
     xlabel(x_axis);
@@ -263,23 +275,30 @@ end
 
 %csvwrite('filtered_data.csv',data);
 %%
-%begin saving data (data table)
+%begin calculating stats and saving data (data table)
 col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
 all_raw_data=[data(:,1), data(:,3), data(:,2), data(:,6), data(:,3), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
-all_stat_data= {'range: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
+saccade_count = sum((all_raw_data(:,8:13) > thres), 1);
+all_stat_data= {
+    'range: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
     'mean: ' sprintf('%.3f, ',mean(all_raw_data(:,2:length(all_raw_data(1,:))))); 
     'stdev: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
-    'stderror: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)))};
+    'stderror: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+    'saccades: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+
 %following manipulation in order to write strings (col
 %headers) to a csv file, which can be opened using excel directly. this writes an extra , at the end of each row, but
 %easier to understand
-fid=fopen(strcat(pathname,'all_data.csv'),'wt');
+leading_name = 'all-data-';
+filenamesstruct = dir(strcat(pathname, leading_name,'*csv'));
+fileindex = size(filenamesstruct);
+fileindex = fileindex(1); %will be 0 if there are none of this kind yet
+fid=fopen(strcat(pathname, leading_name, num2str(fileindex), '.csv'),'wt');
 fprintf(fid, '%s %.3f\n', 'total time selected (s):', time1-time0);
-%count_saccades = 1;
-%if (count_saccades)
-    fprintf(fid, '%s %.2f\n', 'number of saccades: (need to implement)', [1234567]); %TODO
-%end
-for i=1:4
+%TODO: right now just adding all saccades - but should just add together
+%tor or horiz/vert right?
+fprintf(fid, '%s %.2f\n', 'total saccades: (need to implement)', sum(saccade_count)); %TODO
+for i=1:5
    fprintf(fid,'%s,',all_stat_data{i,:}); fprintf(fid,'\n');
 end
 fprintf(fid,'%s,',col_headers{:});
