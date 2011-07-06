@@ -30,7 +30,7 @@ for n=2:(num_rows);
 end 
 %%
 %blink suppression adjustment...
-thres = input('Please input blink suppression threshold in deg/s (0 for none)')
+thres = input('Please input blink suppression threshold in deg/s (0 for none)');
     
 switch logical(true)
     case thres==0
@@ -94,6 +94,12 @@ time1 = time(idx1)
 data = data(idx0:idx1,:);
 v = v(idx0:idx1,:);
 time = data(:,1); %update time, using as a contant name convenience only
+
+pathname = strcat(pathname,'figures/');
+%if figures folder doesn't exist, create it
+if(~exist(pathname))
+    mkdir(pathname);
+end
 %%
 %plotting options for an extra user-specified plot
 %TODO: make the last 2 options the default...
@@ -113,7 +119,6 @@ switch chosen_x
     case 1 %if time was picked as the x for the left eye, we use same time values for right eye since they are concurrent measurements
         x_left = time;
         x_right = x_left;
-    %menu_options = [menu_options 'horiz-vert-tor [deg]']; %ie, if x=time, give a special option that plots it vs horiz, vert, and tor for convenience
     case {2,3,4}
         x_left = data(:,chosen_x);
         x_right = data(:,chosen_x+3);
@@ -155,12 +160,16 @@ if chosen_x ~= 8 %if x is not special case plot, show extra plot y menu and then
     title(h);
     hline(0,'k-'); %need the hline and vline .m function files
     vline(0,'k-');
-    print(strcat(pathname, 'extra figure'),'-dtiff','-r300');
+    leading_name = 'extra-figure-';
+    filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
+    fileindex = size(filenamesstruct);
+    fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
+    print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
 %csvwrite('filtered_data.csv',data);
 end
 
 %%
-%for defaults set hardcoded for now
+%for defaults (position vs time graphs) set hardcoded for now
 x_left = time;
 x_right = x_left;
 chosen_y = 1:3;
@@ -184,8 +193,55 @@ for k = 1:3
     title(h);
     hline(0,'k-'); %need the hline and vline .m function files
     vline(0,'k-');
-    print(strcat(pathname, 'position-vs-time', num2str(k)),'-dtiff','-r300');
+    leading_name = 'position-vs-time-';
+    filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
+    fileindex = size(filenamesstruct);
+    fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
+    print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
 end
+
+%%
+%for defaults (velocity vs time graphs) set hardcoded for now
+x_left = time;
+x_right = x_left;
+chosen_y = 4:6;
+%gets the y data sets for later plotting, for extra graph
+%TODO code repeat from top.
+if (chosen_y < 4) %ie 'position' rather than velocity etc picked as y
+    y_left = data(:,chosen_y+1); %since 'time' choice is left out for y, add 1 to correlate with right column in data matrix; thus choice 1 for y correlates to col 2 in data cols
+    y_right = data(:,chosen_y+4); %yleft col + 3 correlates with the same y value type but for right eye instead of left
+else %velocity picked as y
+    y_left = v(:,chosen_y-3); %ex: choose choice 4 = horiz v, thus gets 4-3=1st col of v (left horiz v)
+    y_right = v(:,chosen_y); %ex: 4th choice = 4th col of v (right horiz v)
+end
+for k = 1:3
+    plot(x_left, y_left(:,k), 'b.', x_right, y_right(:,k), 'r.');
+    axis tight; %rescale axes
+    x_axis = menu_options(1); %time label
+    xlabel(x_axis);
+    y_axis = menu_options(k+4); %+4 since menu options still includes time, then the positions first.
+    ylabel(y_axis);
+    h = strcat(filename, ': ', y_axis, '-vs-', x_axis);
+    title(h);
+    hline(0,'k-'); %need the hline and vline .m function files
+    vline(0,'k-');
+    %save based on # of 'velocity-vs-time' files, so will always add on
+    %instead of overwrite. same with other figures saved.
+    leading_name = 'velocity-vs-time-';
+    filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
+    fileindex = size(filenamesstruct);
+    fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
+    %match = strncmp(leading_name, name, length(leading_name));
+    print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
+end
+
+%found online..unused
+% name = dir(pathname); 
+% k = size(name);
+% for ii = (k(1)+1):(k(1)+2) 
+% fn = sprintf('data_%s',num2str(ii,04i')); %jpegs named file_0001.jpg, file_0002.jpg etc. 
+% save(fn,'deflection','int_force','-mat') 
+% end
 
 %%
 %plot and save figures for all the default graphs
