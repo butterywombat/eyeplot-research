@@ -280,12 +280,99 @@ col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left ve
 all_raw_data=[data(:,1), data(:,3), data(:,2), data(:,6), data(:,3), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
 saccade_count = sum((all_raw_data(:,8:13) > thres), 1);
 all_stat_data= {
-    'range: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
+    'largest range: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
     'mean: ' sprintf('%.3f, ',mean(all_raw_data(:,2:length(all_raw_data(1,:))))); 
     'stdev: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
     'stderror: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
-    'saccades: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+    'saccades/nystagmuses: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
 
+%following manipulation in order to write strings (col
+%headers) to a csv file, which can be opened using excel directly. this writes an extra , at the end of each row, but
+%easier to understand
+leading_name = 'all-data-';
+filenamesstruct = dir(strcat(pathname, leading_name,'*csv'));
+fileindex = size(filenamesstruct);
+fileindex = fileindex(1); %will be 0 if there are none of this kind yet
+fid=fopen(strcat(pathname, leading_name, num2str(fileindex), '.csv'),'wt');
+fprintf(fid, '%s %.3f\n', 'total time selected (s):', time1-time0);
+%TODO: right now just adding all saccades - but should just add together
+%tor or horiz/vert right?
+fprintf(fid, '%s %.2f\n', 'total saccades: (need to implement)', sum(saccade_count)); %TODO
+for i=1:5
+   fprintf(fid,'%s,',all_stat_data{i,:}); fprintf(fid,'\n');
+end
+fprintf(fid,'%s,',col_headers{:});
+fprintf(fid,'\n');
+num_rows = length(all_raw_data(:,1));
+for i=1:num_rows
+     fprintf(fid,'%.3f,',all_raw_data(i,:));
+     fprintf(fid,'\n');
+end
+fclose(fid);
+
+%%
+%second csv export - individual peak data for each dimension. so x3 files.
+%but bottom stats can include all the avg data.
+col_headers = {'peak time [s]' 'amplitude (peak to trough) [deg]' 'peak velocity of rise (only fall for first point) [deg/s]' 'peak velocity of fall [deg/s]'};  
+all_raw_data=[data(:,1), data(:,3), data(:,2), data(:,6), data(:,3), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
+saccade_count = sum((all_raw_data(:,8:13) > thres), 1);
+col_headers_2 = {'horizontal' 'vertical' 'torsional'};
+amplitude_data = {
+    'Amplitude (peak to trough in [deg]) data:';
+    'total # of peaks'; %move elsewhere? at top?
+        'OS: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
+        'OD: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
+    'mean [deg]: ' sprintf('%.3f, ',mean(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+        'OS: ' sprintf('%.3f, ',mean(all_raw_data(:,2:length(all_raw_data(1,:)))));
+        'OD: ' sprintf('%.3f, ',mean(all_raw_data(:,2:length(all_raw_data(1,:)))));
+    'min [deg]: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+        'OS: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+        'OD: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+    'max [deg]: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+        'OS: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+        'OD: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+    'SEM: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+        'OS: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+        'OD: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+    'stdev: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:)))));
+        'OS: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+        'OD: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+        
+velocity_data = {
+    'Velocity (trough to peak (rise) over time in [deg/s]) data:';
+    'rise [deg/s] data';
+    'mean [deg]: ';
+        'OS: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
+        'OD: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
+    'min [deg/s]: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+        'OS: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+        'OD: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+    'max [deg/s]: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+        'OS: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+        'OD: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+    'SEM: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+        'OS: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+        'OD: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+    'stdev: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+        'OS: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+        'OD: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+    'fall [deg/s] data';
+    'mean [deg]: ';
+        'OS: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
+        'OD: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
+    'min [deg/s]: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+        'OS: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+        'OD: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+    'max [deg/s]: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+        'OS: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+        'OD: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+    'SEM: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+        'OS: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+        'OD: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+    'stdev: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+        'OS: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
+        'OD: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+        
 %following manipulation in order to write strings (col
 %headers) to a csv file, which can be opened using excel directly. this writes an extra , at the end of each row, but
 %easier to understand
