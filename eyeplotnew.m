@@ -22,16 +22,18 @@ data(any(isnan(data), 2), :) = []; %deletes all rows that have a NaN
 num_rows = length(data(:,1));
 %%
 %velocity and torsion velocity calculations via forward calculations....
+%todo - could consider doing this AFTER blinks, but then would need to
+%calculate time diff between measurements instead of use static 1/60. maybe
+%use ./ operation
 cols = 2:7;
 s=data(:,cols); %just calc for all things interested in, so can save a data chart
 v = zeros(num_rows, length(cols));
 for n=2:(num_rows);
-    v(n,:)=(s(n,:)-s(n-1,:))/.170; %.170 hardcoded time difference between measurements for the goggle system
+    v(n,:)=(s(n,:)-s(n-1,:))/(1/60); %1/60 hardcoded time difference between measurements for the goggle system
 end 
 %%
 %blink suppression adjustment...
 thres = input('Please input blink suppression threshold in deg/s (0 for none)');
-    
 switch logical(true)
     case thres==0
         disp('No suppression')
@@ -278,7 +280,9 @@ end
 %begin calculating stats and saving data (data table)
 col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
 all_raw_data=[data(:,1), data(:,3), data(:,2), data(:,6), data(:,3), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
-saccade_count = sum((all_raw_data(:,8:13) > thres), 1);
+ordered_velocities = all_raw_data(:,8:13);
+zero_crossing_indices = find(diff(sign(ordered_velocities),1,2));
+saccade_count = sum((ordered_velocities > thres), 1);
 all_stat_data= {
     'largest range: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
     'mean: ' sprintf('%.3f, ',mean(all_raw_data(:,2:length(all_raw_data(1,:))))); 
@@ -313,19 +317,25 @@ fclose(fid);
 %tests
 %[peakLoc] = peakfinder(data(:,3), thres/60); %since 60 hz
 %peakfinder(data(:,2), thres/60);
-peakLoc = peakfinder(data(:,7), thres/60);
-peakfinder(data(:,7), thres/60)
-disp(length(peakLoc));
-peakLoc = peakfinder(data(:,4), thres/60);
-peakfinder(data(:,4), thres/60)
-disp(length(peakLoc));
+
+% peakLoc = peakfinder(data(:,7), thres/60);
+% peakfinder(data(:,7), thres/60)
+% disp(length(peakLoc));
+% peakLoc = peakfinder(data(:,4), thres/60);
+% peakfinder(data(:,4), thres/60)
+% disp(length(peakLoc));
 
 %other method, findpeaks
 x = time;
 y = data(:,4);
-P = findpeaks(time, data(:,4), thres, 4, 'true', 3);
-disp(length(P));
-plot(x,y,'.-',P(:,2),P(:,3),'ro','linewidth',2);
+%P = findpeaks(time, data(:,4), thres, 4, 2, 3);
+%disp(length(P));
+%plot(x,y,'.-',P(:,2),P(:,3),'ro','linewidth',2);
+%t=fpeak(x,y,1,[-inf,inf,-inf,inf]);
+%plot(t(:,1),t(:,2),'o');
+%plot(x,y,'.-',t(:,1),t(:,2),'ro','linewidth',2);
+
+%disp(length(t));
 %TODO read note- repeat values counted only once???
 %TODO close bracket window when done to avoid further thingy errors
 % %%
