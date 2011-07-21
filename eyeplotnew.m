@@ -18,7 +18,7 @@ data = textscan(fid, format,'HeaderLines',23,'CollectOutput',1, 'treatAsEmpty', 
 %treat all ÿs as NaN so that later can delete all those rows with NaN.
 %data = textscan(fid, '%f %*f %f %*f %*f %f %*f %f %*f %*f %*f %*f %f %*f %*f %f %*f %f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f','HeaderLines',23,'CollectOutput',1, 'treatAsEmpty'); %I kept the times but each interval is .016-.017 sec constant so unneeded
 data = cell2mat(data); %TODO this may be a better idea to avoid garbagey code like the following...
-data(any(isnan(data), 2), :) = []; %deletes all rows that have a NaN
+data(any(isnan(data), 2), :) = []; %deletes all rows that have a NaN %clever useful matlab parts
 num_rows = length(data(:,1));
 %%
 %velocity and torsion velocity calculations via forward calculations....
@@ -274,14 +274,16 @@ end
 %         case 9
 %             chosen_x = 4; %for tor label
 %     end
-
+s
 %csvwrite('filtered_data.csv',data);
 %%
 %begin calculating stats and saving data (data table)
 col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
 all_raw_data=[data(:,1), data(:,3), data(:,2), data(:,6), data(:,3), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
 ordered_velocities = all_raw_data(:,8:13);
-zero_crossing_indices = find(diff(sign(ordered_velocities),1,2));
+diffs = (diff(sign(ordered_velocities))); %nonzero means crosses y=0
+diffs = logical(diffs~=0);
+%TODOOOOO HEEREEEE ****
 saccade_count = sum((ordered_velocities > thres), 1);
 all_stat_data= {
     'largest range: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
