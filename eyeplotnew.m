@@ -1,6 +1,7 @@
 function [ output_args ] = eyeplot( input_args )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
+hold off;
 filterspec = '~/Desktop/school/eye research/pt exports/*.txt'; %set default dir and filetype
 [filename, pathname, filterindex] = uigetfile(filterspec);
 if isequal(filename,0)
@@ -21,29 +22,38 @@ data = cell2mat(data); %TODO this may be a better idea to avoid garbagey code li
 data(any(isnan(data), 2), :) = []; %deletes all rows that have a NaN %clever useful matlab parts
 num_rows = length(data(:,1));
 %%
-%velocity and torsion velocity calculations via forward calculations....
+%velocity and torsion velocity calculations via BACKWARD
+%calculations....????
+%TODO
 %todo - could consider doing this AFTER blinks, but then would need to
 %calculate time diff between measurements instead of use static 1/60. maybe
 %use ./ operation
 cols = 2:7;
 s=data(:,cols); %just calc for all things interested in, so can save a data chart
 v = zeros(num_rows, length(cols));
-for n=2:(num_rows);
-    v(n,:)=(s(n,:)-s(n-1,:))/(1/60); %1/60 hardcoded time difference between measurements for the goggle system
-end 
+% for n=2:(num_rows);
+%     v(n,:)=(s(n,:)-s(n-1,:))/(1/60); %1/60 hardcoded time difference between measurements for the goggle system
+% end 
+
+%forward calcs
+for n=1:(num_rows-1);
+    v(n,:)=(s(n+1,:)-s(n,:))/(1/60); %1/60 hardcoded time difference between measurements for the goggle system
+end
+%deal with left edge! read matlab signal processing sample
+v(num_rows,:) = 0; %not a good number to use.
 %%
 %blink suppression adjustment...
-thres = input('Please input blink suppression threshold in deg/s (0 for none)');
+thres = input('Please input blink suppression threshold in deg/s (0 for none). ');
 switch logical(true)
     case thres==0
-        disp('No suppression')
+        disp('No suppression.')
     case thres>0
         rows_to_remove = any(abs(v)>=thres, 2); %this records the rows that we want to remove for blink suppression! important
         v(rows_to_remove,:) = [];
         data(rows_to_remove,:) = [];
         disp(sprintf('Blinks suppressed, %d data points will be removed.', length(rows_to_remove)));
     otherwise
-        disp('No suppression')
+        disp('No suppression.')
 end
 
 %%
@@ -274,23 +284,114 @@ end
 %         case 9
 %             chosen_x = 4; %for tor label
 %     end
-s
 %csvwrite('filtered_data.csv',data);
 %%
 %begin calculating stats and saving data (data table)
 col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
 all_raw_data=[data(:,1), data(:,3), data(:,2), data(:,6), data(:,3), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
-ordered_velocities = all_raw_data(:,8:13);
-diffs = (diff(sign(ordered_velocities))); %nonzero means crosses y=0
-diffs = logical(diffs~=0);
-%TODOOOOO HEEREEEE ****
-saccade_count = sum((ordered_velocities > thres), 1);
+%TODO - maybe fix this so that it is always in this order instead of
+%varying somehow?
+ordered_amps = all_raw_data(:,1:7);
+ordered_velocities = all_raw_data(:,8:13); %for convenience reference
+%ordered_times = time(:,ones(1,6));
+non_peak_locs = diff(sign(ordered_velocities)); %nonzero means crosses y=0 ie in position vs time graph there is a local peak (min or max).
+%TODO: min/max--right now, after using thresh, should always be a
+%max...??
+non_peak_locs = logical(non_peak_locs==0);
+non_peak_locs =  logical([non_peak_locs; ones(1,6)]); %hotfix right now, redo. really fugly.
+%must deal with edges - below logic is not working since there is 1 extra
+%value or look more at diff. diff has 1 less currently. but last row of v
+%is 0...not useful, but must match position's size.
+x = time;
+y = data(:,4);
+[maxtab, mintab] = peakdet(y', .5, x');
+plot(x,y,'-',maxtab(:,1),maxtab(:,2),'ro','linewidth',1);
+hold on;
+plot(x,y,'-',mintab(:,1),mintab(:,2),'go','linewidth',1);
+size(maxtab)
+size(mintab)
+hold off;
+
+locs_to_delete = non_peak_locs | (ordered_velocities < thres); %logical indexing--get rid of non peaks based on velocity changing signs and get rid of peaks that do not meet user-specified saccade threshold
+%TOOODOOO - need to add amp. maybe easier to just have a matrix of indices
+%of where to keep/discard? same in all 3 cases.
+
+
+% v_dat = struct('t', num2cell(time(:,ones(1,6)),1), 'v', num2cell(all_raw_data(:,8:13),1), 'isnotpeak', num2cell(non_peak_locs,1));
+% %btw can also do v_dat(1,2) or something to reference
+% v_dat.v(v_dat.isnotpeak) = [];
+% %naah..this will just return the last one unless you want to assign more
+% %variables etc to each individual value of the 6 returned. csv'd
+% thres_del = v_dat.v < thres;
+% v_dat(thres_del) = [];
+
+%TODOOO HEREEEE AHHH!!! USE CELL ARRAY/STRUCT OR SOMETHING--CANNOT HAVE
+%VARIABLE COL SIZE IN ARRAY. jul 23
+%ALSO FIX OTHER THINGS INTO STRUCT OR CELL ARRAY FOR CLARITY.
+
+
+%ordered_velocities = num2cell(ordered_velocities,1); %convert so cols can varying lengths
+
+peak_table = struct('name',{}, 't',{}, 'v',{}, 's',{});
+
+for i=1:6
+    
+    %     %this method seems redundant--made matrix into cell array, then get
+    %     %elements of cell array, then save back into cell array. maybe just
+    %     %think about appending to a new cell array per each col thing.
+    %     curr_col = ordered_velocities{i};
+    %     curr_col(non_peak_locs(:,i)) = [];
+    %     ordered_velocities{i} = curr_col;
+    curr_col_t = time;
+    curr_col_v = ordered_velocities(:,i);
+    curr_col_s = ordered_amps(:,i);
+    curr_locs_to_delete = locs_to_delete(:,i);
+    curr_col_t(curr_locs_to_delete) = [];
+    curr_col_v(curr_locs_to_delete) = [];
+    curr_col_s(curr_locs_to_delete) = []'
+    peak_table(i).t = curr_col_t;
+    peak_table(i).v = curr_col_v;
+    peak_table(i).s = curr_col_s;
+    peak_table(i).name = col_headers{i+7}; %better way?
+end
+
+disp(peak_table);
+
+%do times one by one instead beginning of try. continue this if above does
+%not work
+% for i=1:6 %get times for each peak
+%     col_time = time;
+%     col_time(non_peak_locs(:,i)) = []; %get rid of the non peaks for each column's individual times.
+%     col_header = {'time [s]' 'peak [deg/s]'};
+%     col_output = [col_time, ordered_velocities(:,i)];
+%     
+% end
+
+x = time;
+y = v(:,3); %left tor v
+[maxtab, mintab] = peakdet(data(:,4), 4, x)
+plot(x,y,'.-',maxtab(:,1),maxtab(:,2),'ro','linewidth',1);
+
+
+%DUNDUNDUUUUN!! hamsterrr moment of truth--seems ot work. needs more
+%saccade sensitivity
+%TODO: mins too, and of course smoothing!!!
+%test graphs below
+plot(x,y,'.-',peak_table(6).t,peak_table(6).v,'ro','linewidth',1);
+y = data(:,4);
+plot(x,y,'.-',peak_table(6).t,peak_table(6).s,'ro','linewidth',1);
+
+
+saccade_counts = zeros(1,6);
+for i=1:6
+    saccade_counts(i) = length(peak_table(i).t);
+end
 all_stat_data= {
     'largest range: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
     'mean: ' sprintf('%.3f, ',mean(all_raw_data(:,2:length(all_raw_data(1,:))))); 
     'stdev: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
     'stderror: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
-    'saccades/nystagmuses: ' strcat(',,,,,,', sprintf('%d, ',saccade_count))};
+    'saccades/nystagmuses: ' strcat(',,,,,,', sprintf('%d, ',saccade_counts))};
 
 %following manipulation in order to write strings (col
 %headers) to a csv file, which can be opened using excel directly. this writes an extra , at the end of each row, but
@@ -303,7 +404,7 @@ fid=fopen(strcat(pathname, leading_name, num2str(fileindex), '.csv'),'wt');
 fprintf(fid, '%s %.3f\n', 'total time selected (s):', time1-time0);
 %TODO: right now just adding all saccades - but should just add together
 %tor or horiz/vert right?
-fprintf(fid, '%s %.2f\n', 'total saccades: (need to implement)', sum(saccade_count)); %TODO
+fprintf(fid, '%s %.2f\n', 'total saccades: (need to implement)', sum(saccade_counts)); %TODO
 for i=1:5
    fprintf(fid,'%s,',all_stat_data{i,:}); fprintf(fid,'\n');
 end
