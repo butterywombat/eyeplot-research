@@ -150,6 +150,7 @@ end
 x_left = time;
 x_right = x_left;
 chosen_y = 1:3;
+
 %gets the y data sets for later plotting, for extra graph
 %TODO refactor since code repeated from top.
 if (chosen_y < 4) %ie 'position' rather than velocity etc picked as y
@@ -159,6 +160,9 @@ else %velocity picked as y
     y_left = v(:,chosen_y-3); %ex: choose choice 4 = horiz v, thus gets 4-3=1st col of v (left horiz v)
     y_right = v(:,chosen_y); %ex: 4th choice = 4th col of v (right horiz v)
 end
+
+peak_table = struct('name',{}, 't',{}, 'v',{}, 's',{});
+col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
 for k = 1:3
     plot(x_left, y_left(:,k), 'b-', x_right, y_right(:,k), 'r-');
     axis tight; %rescale axes
@@ -176,9 +180,9 @@ for k = 1:3
     fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
     print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
     
-    y_both = [y_left(:,k), y_right(:,k)];
-    eyes = {' LEFT' ' RIGHT'};
-    for i = 1:2 %left eye, right eye
+    y_both = [y_right(:,k), y_left(:,k)];
+    eyes = {' RIGHT' ' LEFT'};
+    for i = 1:2 %right eye, left eye
         x = time;
         y = y_both(:,i);
         [maxtab, mintab] = peakdet(y', .5, x');
@@ -194,14 +198,42 @@ for k = 1:3
         fileindex = size(filenamesstruct);
         fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
         print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
-        size(maxtab)
-        size(mintab)
+        %size(mintab)
         hold off;
+        
+        %TODO: something wrong here!! file names/labels/etc don't match
+        %anything.
+        curr_peak_col = k*i;
+        peak_table(curr_peak_col).t = maxtab(:,1);
+        peak_table(curr_peak_col).v = v(maxtab(:,3));
+        peak_table(curr_peak_col).s = maxtab(:,2);
+        peak_table(curr_peak_col).name = col_headers{(curr_peak_col)+1} %better way?
+        size(maxtab(:,1))
+        %TODO - mins as well!!!
+        %save maxtab, mintab, and titles
     end
+    
+%     for i=1:6
+%         
+%         %     %this method seems redundant--made matrix into cell array, then get
+%         %     %elements of cell array, then save back into cell array. maybe just
+%         %     %think about appending to a new cell array per each col thing.
+%         %     curr_col = ordered_velocities{i};
+%         %     curr_col(non_peak_locs(:,i)) = [];
+%         %     ordered_velocities{i} = curr_col;
+%         peak_table(i).t = maxtab(:,1);
+%         peak_table(i).v = curr_col_v;
+%         peak_table(i).s = maxtab(:,2);
+%         peak_table(i).name = col_headers{i+7}; %better way?
+%     end
+
 end
 %aug 7 TODO - velocity outputs using
 %peakdet, counts for overall thing, then separate velocity outputs
 %center data around means
+
+disp(peak_table);
+
 
 %%
 %for defaults (velocity vs time graphs) set hardcoded for now
@@ -240,7 +272,7 @@ end
 
 %%
 %begin calculating stats and saving data (data table)
-col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
+%col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
 all_raw_data=[data(:,1), data(:,3), data(:,2), data(:,6), data(:,3), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
 %TODO - maybe fix this so that it is always in this order instead of
 %varying somehow?
@@ -280,40 +312,17 @@ for k = 1:3
     print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
 end
 %%
-x = time;
-y = data(:,4);
-[maxtab, mintab] = peakdet(y', .5, x');
-plot(x,y,'-',maxtab(:,1),maxtab(:,2),'ro','linewidth',1);
-hold on;
-plot(x,y,'-',mintab(:,1),mintab(:,2),'go','linewidth',1);
-size(maxtab)
-size(mintab)
-hold off;
+% x = time;
+% y = data(:,4);
+% [maxtab, mintab] = peakdet(y', .5, x');
+% plot(x,y,'-',maxtab(:,1),maxtab(:,2),'ro','linewidth',1);
+% hold on;
+% plot(x,y,'-',mintab(:,1),mintab(:,2),'go','linewidth',1);
+% size(maxtab)
+% size(mintab)
+% hold off;
 
-peak_table = struct('name',{}, 't',{}, 'v',{}, 's',{});
 
-for i=1:6
-    
-    %     %this method seems redundant--made matrix into cell array, then get
-    %     %elements of cell array, then save back into cell array. maybe just
-    %     %think about appending to a new cell array per each col thing.
-    %     curr_col = ordered_velocities{i};
-    %     curr_col(non_peak_locs(:,i)) = [];
-    %     ordered_velocities{i} = curr_col;
-    curr_col_t = time;
-    curr_col_v = ordered_velocities(:,i);
-    curr_col_s = ordered_amps(:,i);
-    curr_locs_to_delete = locs_to_delete(:,i);
-    curr_col_t(curr_locs_to_delete) = [];
-    curr_col_v(curr_locs_to_delete) = [];
-    curr_col_s(curr_locs_to_delete) = []'
-    peak_table(i).t = curr_col_t;
-    peak_table(i).v = curr_col_v;
-    peak_table(i).s = curr_col_s;
-    peak_table(i).name = col_headers{i+7}; %better way?
-end
-
-disp(peak_table);
 
 %do times one by one instead beginning of try. continue this if above does
 %not work
@@ -325,10 +334,10 @@ disp(peak_table);
 %     
 % end
 
-x = time;
-y = v(:,3); %left tor v
-[maxtab, mintab] = peakdet(data(:,4), 4, x)
-plot(x,y,'.-',maxtab(:,1),maxtab(:,2),'ro','linewidth',1);
+% x = time;
+% y = v(:,3); %left tor v
+% [maxtab, mintab] = peakdet(data(:,4), 4, x)
+% plot(x,y,'.-',maxtab(:,1),maxtab(:,2),'ro','linewidth',1);
 
 
 %DUNDUNDUUUUN!! hamsterrr moment of truth--seems ot work. needs more
