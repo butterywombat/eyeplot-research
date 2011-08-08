@@ -294,14 +294,40 @@ all_raw_data=[data(:,1), data(:,3), data(:,2), data(:,6), data(:,3), data(:,7), 
 ordered_amps = all_raw_data(:,1:7);
 ordered_velocities = all_raw_data(:,8:13); %for convenience reference
 %ordered_times = time(:,ones(1,6));
-non_peak_locs = diff(sign(ordered_velocities)); %nonzero means crosses y=0 ie in position vs time graph there is a local peak (min or max).
-%TODO: min/max--right now, after using thresh, should always be a
-%max...??
-non_peak_locs = logical(non_peak_locs==0);
-non_peak_locs =  logical([non_peak_locs; ones(1,6)]); %hotfix right now, redo. really fugly.
-%must deal with edges - below logic is not working since there is 1 extra
-%value or look more at diff. diff has 1 less currently. but last row of v
-%is 0...not useful, but must match position's size.
+
+%%
+% %my way to calculate peaks, wasn't very successful. based on 0 crossings
+% %of derivative.
+% non_peak_locs = diff(sign(ordered_velocities)); %nonzero means crosses y=0 ie in position vs time graph there is a local peak (min or max).
+% %TODO: min/max--right now, after using thresh, should always be a
+% %max...??
+% non_peak_locs = logical(non_peak_locs==0);
+% non_peak_locs =  logical([non_peak_locs; ones(1,6)]); %hotfix right now, redo. really fugly.
+% %must deal with edges - below logic is not working since there is 1 extra
+% %value or look more at diff. diff has 1 less currently. but last row of v
+% %is 0...not useful, but must match position's size.
+% locs_to_delete = non_peak_locs | (ordered_velocities < thres); %logical indexing--get rid of non peaks based on velocity changing signs and get rid of peaks that do not meet user-specified saccade threshold
+% %TOOODOOO - need to add amp. maybe easier to just have a matrix of indices
+% %of where to keep/discard? same in all 3 cases.
+% 
+% 
+% % v_dat = struct('t', num2cell(time(:,ones(1,6)),1), 'v', num2cell(all_raw_data(:,8:13),1), 'isnotpeak', num2cell(non_peak_locs,1));
+% % %btw can also do v_dat(1,2) or something to reference
+% % v_dat.v(v_dat.isnotpeak) = [];
+% % %naah..this will just return the last one unless you want to assign more
+% % %variables etc to each individual value of the 6 returned. csv'd
+% % thres_del = v_dat.v < thres;
+% % v_dat(thres_del) = [];
+% 
+% %TODOOO HEREEEE AHHH!!! USE CELL ARRAY/STRUCT OR SOMETHING--CANNOT HAVE
+% %VARIABLE COL SIZE IN ARRAY. jul 23
+% %ALSO FIX OTHER THINGS INTO STRUCT OR CELL ARRAY FOR CLARITY.
+% 
+% 
+% %ordered_velocities = num2cell(ordered_velocities,1); %convert so cols can varying lengths
+
+
+%%
 x = time;
 y = data(:,4);
 [maxtab, mintab] = peakdet(y', .5, x');
@@ -311,26 +337,6 @@ plot(x,y,'-',mintab(:,1),mintab(:,2),'go','linewidth',1);
 size(maxtab)
 size(mintab)
 hold off;
-
-locs_to_delete = non_peak_locs | (ordered_velocities < thres); %logical indexing--get rid of non peaks based on velocity changing signs and get rid of peaks that do not meet user-specified saccade threshold
-%TOOODOOO - need to add amp. maybe easier to just have a matrix of indices
-%of where to keep/discard? same in all 3 cases.
-
-
-% v_dat = struct('t', num2cell(time(:,ones(1,6)),1), 'v', num2cell(all_raw_data(:,8:13),1), 'isnotpeak', num2cell(non_peak_locs,1));
-% %btw can also do v_dat(1,2) or something to reference
-% v_dat.v(v_dat.isnotpeak) = [];
-% %naah..this will just return the last one unless you want to assign more
-% %variables etc to each individual value of the 6 returned. csv'd
-% thres_del = v_dat.v < thres;
-% v_dat(thres_del) = [];
-
-%TODOOO HEREEEE AHHH!!! USE CELL ARRAY/STRUCT OR SOMETHING--CANNOT HAVE
-%VARIABLE COL SIZE IN ARRAY. jul 23
-%ALSO FIX OTHER THINGS INTO STRUCT OR CELL ARRAY FOR CLARITY.
-
-
-%ordered_velocities = num2cell(ordered_velocities,1); %convert so cols can varying lengths
 
 peak_table = struct('name',{}, 't',{}, 'v',{}, 's',{});
 
