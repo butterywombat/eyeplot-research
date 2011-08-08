@@ -12,34 +12,23 @@ else
 end
 
 fid=fopen(fullfile(pathname, filename)); %ask for this later so can do primary gaze. works with Olheiser and Vomund LRUD
-%max_num_col = 7;
 format = '%f %*f %f %*f %*f %f %*f %f %*f %*f %*f %*f %f %*f %*f %f %*f %f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f';
-%garbage = 'ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ'
 data = textscan(fid, format,'HeaderLines',23,'CollectOutput',1, 'treatAsEmpty', 'ÿ'); %I kept the times but each interval is .016-.017 sec constant so unneeded
-%treat all ÿs as NaN so that later can delete all those rows with NaN.
-%data = textscan(fid, '%f %*f %f %*f %*f %f %*f %f %*f %*f %*f %*f %f %*f %*f %f %*f %f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f','HeaderLines',23,'CollectOutput',1, 'treatAsEmpty'); %I kept the times but each interval is .016-.017 sec constant so unneeded
-data = cell2mat(data); %TODO this may be a better idea to avoid garbagey code like the following...
-data(any(isnan(data), 2), :) = []; %deletes all rows that have a NaN %clever useful matlab parts
+data = cell2mat(data);
+data(any(isnan(data), 2), :) = []; %deletes all rows that have a NaN, which were converted from 'ÿ', clever useful matlab parts
 num_rows = length(data(:,1));
 %%
-%velocity and torsion velocity calculations via BACKWARD
-%calculations....????
-%TODO
 %todo - could consider doing this AFTER blinks, but then would need to
 %calculate time diff between measurements instead of use static 1/60. maybe
 %use ./ operation
 cols = 2:7;
-s=data(:,cols); %just calc for all things interested in, so can save a data chart
+s=data(:,cols);
 v = zeros(num_rows, length(cols));
-% for n=2:(num_rows);
-%     v(n,:)=(s(n,:)-s(n-1,:))/(1/60); %1/60 hardcoded time difference between measurements for the goggle system
-% end 
-
-%forward calcs
+%forward calculations for velocity
 for n=1:(num_rows-1);
     v(n,:)=(s(n+1,:)-s(n,:))/(1/60); %1/60 hardcoded time difference between measurements for the goggle system
 end
-%deal with left edge! read matlab signal processing sample
+%todo deal with left edge! read matlab signal processing sample
 v(num_rows,:) = 0; %not a good number to use.
 %%
 %blink suppression adjustment...
@@ -69,24 +58,6 @@ end
 %%
 %CONSTANTSish...why doesn't matlab have constants?
 time = data(:,1);
-% left_horiz = data(:,2); %all measurements in degrees or deg/sec for velocity
-% left_vert = data(:,3);
-% left_tor = data(:,4);
-% right_horiz = data(:,5);
-% right_vert = data(:,6);
-% right_tor = data(:,7);
-% 
-% left_horiz_v = v(:,1);
-% left_vert_v = v(:,2);
-% left_tor_v = v(:,3);
-% right_horiz_v = v(:,4);
-% right_vert_v = v(:,5);
-% right_tor_v = v(:,6);
-
-    %plot(time,v,'o') %was done as a check
-            
-%var_names = ['left_horiz', 'left_horiz_v', 'left_vert', 'left_vert_v', 'left_tor', 'left_tor_v', 'right_horiz', 'right_horiz_v', 'right_vert', 'right_vert_v', 'right_tor', 'right_tor_v']; %string stuff, duno how to use yet
-
 %%
 %time bracketing
 h = plot(time, data(:,2:4), 'b-', time, data(:,5:7), 'r-'); %plots all on one graph just for time bracketing purposes
@@ -127,8 +98,6 @@ end
 %%
 %plotting options for an extra user-specified plot
 %TODO: make the last 2 options the default...
-%menu_options = {'1)time [s]' '2)horiz (left-right) [deg]' '3)vert (up-down) [deg]' '4)tor (CW-CCW) [deg]' '5)horiz_v [deg/s]' '6)vert_v [deg/s]'  '7)tor_v [deg/s]' '8)horiz-vert-tor vs time' '9)horiz-vert vs tor (primary gaze)'}; %TODO: deal with velocities.
-%defaults will be plotted anyway. show a menu 
 menu_options = {'time [s]' 'horiz (left-right) [deg]' 'vert (up-down) [deg]' 'tor (CW-CCW) [deg]' 'horiz_v [deg/s]' 'vert_v [deg/s]'  'tor_v [deg/s]' 'skip extra plot'};
 
 %TODO
@@ -152,12 +121,6 @@ switch chosen_x
     %note that if skipped, no x values set yet!
 end
 
-%     case 8 %for hvt vs t initially. must change for tor stuff later.
-%         x_left = time; 
-%         x_right = xleft;
-%         chosen_y = 1:3;
-
-%if (isempty(chosen_y)) %if it's not plot defaults only, show y menu.
 if chosen_x ~= 8 %if x is not special case plot, show extra plot y menu and then plot/save.
     chosen_y = menu('Choose a y', menu_options(2:7)); %I left out time as a choice for y, so menu_options start at col 2.
     %choice 1 = horiz, 2 = vert, 3 = tor, 4 = horiz v, 5 = vert v, 6 = tor
@@ -189,7 +152,6 @@ if chosen_x ~= 8 %if x is not special case plot, show extra plot y menu and then
     fileindex = size(filenamesstruct);
     fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
     print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
-%csvwrite('filtered_data.csv',data);
 end
 
 %%
@@ -198,7 +160,7 @@ x_left = time;
 x_right = x_left;
 chosen_y = 1:3;
 %gets the y data sets for later plotting, for extra graph
-%TODO code repeat from top.
+%TODO refactor since code repeated from top.
 if (chosen_y < 4) %ie 'position' rather than velocity etc picked as y
     y_left = data(:,chosen_y+1); %since 'time' choice is left out for y, add 1 to correlate with right column in data matrix; thus choice 1 for y correlates to col 2 in data cols
     y_right = data(:,chosen_y+4); %yleft col + 3 correlates with the same y value type but for right eye instead of left
@@ -259,32 +221,6 @@ for k = 1:3
     print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
 end
 
-%found online..unused
-% name = dir(pathname); 
-% k = size(name);
-% for ii = (k(1)+1):(k(1)+2) 
-% fn = sprintf('data_%s',num2str(ii,04i')); %jpegs named file_0001.jpg, file_0002.jpg etc. 
-% save(fn,'deflection','int_force','-mat') 
-% end
-
-%%
-%plot and save figures for all the default graphs
-% for k = 1:3 %handle horiz vs time, vert vs time, tor vs time
-%     if (k < 4) %ie 'position' rather than velocity etc picked as y
-%         y_left = data(:,k+1); %since 'time' choice is left out for y, add 1 to correlate with right column in data matrix; thus choice 1 for y correlates to col 2 in data cols
-%         y_right = data(:,k+4); %yleft col + 3 correlates with the same y value type but for right eye instead of left
-%     else %velocity picked as y
-%         y_left = v(:,k-3); %ex: choose choice 4 = horiz v, thus gets 4-3=1st col of v (left horiz v)
-%         y_right = v(:,k); %ex: 4th choice = 4th col of v (right horiz v)
-%     end
-%     plot(x_left, y_left, 'b.', x_right, y_right, 'r.');
-%     switch chosen_x
-%         case 8
-%             chosen_x = 1; %for time label
-%         case 9
-%             chosen_x = 4; %for tor label
-%     end
-%csvwrite('filtered_data.csv',data);
 %%
 %begin calculating stats and saving data (data table)
 col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
@@ -294,38 +230,6 @@ all_raw_data=[data(:,1), data(:,3), data(:,2), data(:,6), data(:,3), data(:,7), 
 ordered_amps = all_raw_data(:,1:7);
 ordered_velocities = all_raw_data(:,8:13); %for convenience reference
 %ordered_times = time(:,ones(1,6));
-
-%%
-% %my way to calculate peaks, wasn't very successful. based on 0 crossings
-% %of derivative.
-% non_peak_locs = diff(sign(ordered_velocities)); %nonzero means crosses y=0 ie in position vs time graph there is a local peak (min or max).
-% %TODO: min/max--right now, after using thresh, should always be a
-% %max...??
-% non_peak_locs = logical(non_peak_locs==0);
-% non_peak_locs =  logical([non_peak_locs; ones(1,6)]); %hotfix right now, redo. really fugly.
-% %must deal with edges - below logic is not working since there is 1 extra
-% %value or look more at diff. diff has 1 less currently. but last row of v
-% %is 0...not useful, but must match position's size.
-% locs_to_delete = non_peak_locs | (ordered_velocities < thres); %logical indexing--get rid of non peaks based on velocity changing signs and get rid of peaks that do not meet user-specified saccade threshold
-% %TOOODOOO - need to add amp. maybe easier to just have a matrix of indices
-% %of where to keep/discard? same in all 3 cases.
-% 
-% 
-% % v_dat = struct('t', num2cell(time(:,ones(1,6)),1), 'v', num2cell(all_raw_data(:,8:13),1), 'isnotpeak', num2cell(non_peak_locs,1));
-% % %btw can also do v_dat(1,2) or something to reference
-% % v_dat.v(v_dat.isnotpeak) = [];
-% % %naah..this will just return the last one unless you want to assign more
-% % %variables etc to each individual value of the 6 returned. csv'd
-% % thres_del = v_dat.v < thres;
-% % v_dat(thres_del) = [];
-% 
-% %TODOOO HEREEEE AHHH!!! USE CELL ARRAY/STRUCT OR SOMETHING--CANNOT HAVE
-% %VARIABLE COL SIZE IN ARRAY. jul 23
-% %ALSO FIX OTHER THINGS INTO STRUCT OR CELL ARRAY FOR CLARITY.
-% 
-% 
-% %ordered_velocities = num2cell(ordered_velocities,1); %convert so cols can varying lengths
-
 
 %%
 x = time;
