@@ -38,6 +38,7 @@ switch logical(true)
         disp('No suppression.')
     case thres>0
         rows_to_remove = any(abs(v)>=thres, 2); %this records the rows that we want to remove for blink suppression! important
+        %removes both eyes if one eye has a blink.
         v(rows_to_remove,:) = [];
         data(rows_to_remove,:) = [];
         disp(sprintf('Blinks suppressed, %d data points will be removed.', length(rows_to_remove)));
@@ -45,16 +46,6 @@ switch logical(true)
         disp('No suppression.')
 end
 
-%%
-%saccade threshold
-thres = input('Please input saccade threshold in deg/s (0 for none).  Anything above this will be counted as a saccade. ');
-    
-switch logical(true)
-    case thres>0
-        disp('Saccade threshold entered.')
-    otherwise
-        disp('Default of 10 deg/s used.')
-end
 %%
 %CONSTANTSish...why doesn't matlab have constants?
 time = data(:,1);
@@ -184,7 +175,33 @@ for k = 1:3
     fileindex = size(filenamesstruct);
     fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
     print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
+    
+    y_both = [y_left(:,k), y_right(:,k)];
+    eyes = {' LEFT' ' RIGHT'};
+    for i = 1:2 %left eye, right eye
+        x = time;
+        y = y_both(:,i);
+        [maxtab, mintab] = peakdet(y', .5, x');
+        plot(x, y,'-',maxtab(:,1),maxtab(:,2),'ro', mintab(:,1), mintab(:,2), 'go', 'linewidth',1);
+        axis tight;
+        xlabel(x_axis);
+        ylabel(strcat(y_axis, eyes(i)));
+        title(strcat(h, eyes(i)));
+        hline(0,'k-');
+        vline(0,'k-');
+        leading_name = 'PEAKS-position-vs-time-';
+        filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
+        fileindex = size(filenamesstruct);
+        fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
+        print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
+        size(maxtab)
+        size(mintab)
+        hold off;
+    end
 end
+%aug 7 TODO - velocity outputs using
+%peakdet, counts for overall thing, then separate velocity outputs
+%center data around means
 
 %%
 %for defaults (velocity vs time graphs) set hardcoded for now
@@ -231,6 +248,37 @@ ordered_amps = all_raw_data(:,1:7);
 ordered_velocities = all_raw_data(:,8:13); %for convenience reference
 %ordered_times = time(:,ones(1,6));
 
+%%
+%for defaults (position vs time graphs) set hardcoded for now
+x_left = time;
+x_right = x_left;
+chosen_y = 1:3;
+%gets the y data sets for later plotting, for extra graph
+%TODO refactor since code repeated from top.
+if (chosen_y < 4) %ie 'position' rather than velocity etc picked as y
+    y_left = data(:,chosen_y+1); %since 'time' choice is left out for y, add 1 to correlate with right column in data matrix; thus choice 1 for y correlates to col 2 in data cols
+    y_right = data(:,chosen_y+4); %yleft col + 3 correlates with the same y value type but for right eye instead of left
+else %velocity picked as y
+    y_left = v(:,chosen_y-3); %ex: choose choice 4 = horiz v, thus gets 4-3=1st col of v (left horiz v)
+    y_right = v(:,chosen_y); %ex: 4th choice = 4th col of v (right horiz v)
+end
+for k = 1:3
+    plot(x_left, y_left(:,k), 'b-', x_right, y_right(:,k), 'r-');
+    axis tight; %rescale axes
+    x_axis = menu_options(1); %time label
+    xlabel(x_axis);
+    y_axis = menu_options(k+1); %+1 since menu options still includes time first.
+    ylabel(y_axis);
+    h = strcat(filename, ': ', y_axis, '-vs-', x_axis);
+    title(h);
+    hline(0,'k-'); %need the hline and vline .m function files
+    vline(0,'k-');
+    leading_name = 'position-vs-time-';
+    filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
+    fileindex = size(filenamesstruct);
+    fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
+    print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
+end
 %%
 x = time;
 y = data(:,4);
