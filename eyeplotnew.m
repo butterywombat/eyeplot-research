@@ -166,6 +166,8 @@ peak_table = struct('name',{}, 't',{}, 'v',{}, 's',{});
 %there are 6 of these entries (1- right horiz, 2- left horiz, right vert, left
 %vert, right tor, left tor)
 col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
+
+curr_peak_col = 1;
 for k = 1:3 %TODO maybe refactor so it's 1:6, combine y_left and right? so that no inner for loop/calculations
     plot(x_left, y_left(:,k), 'b-', x_right, y_right(:,k), 'r-');
     axis tight; %rescale axes
@@ -190,12 +192,12 @@ for k = 1:3 %TODO maybe refactor so it's 1:6, combine y_left and right? so that 
         y = y_both(:,i);
         [maxtab, mintab] = peakdet(y', .5, x');
         plot(x, y,'-',maxtab(:,1),maxtab(:,2),'ro', mintab(:,1), mintab(:,2), 'go', 'linewidth',1);
+        axis normal; %try auto too. or auto x.
         xlabel(x_axis);
         ylabel(strcat(y_axis, eyes(i)));
         title(strcat(h, eyes(i)));
         hline(0,'k-');
         vline(0,'k-');
-        axis tight;
         leading_name = 'PEAKS-position-vs-time-';
         filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
         fileindex = size(filenamesstruct);
@@ -205,12 +207,12 @@ for k = 1:3 %TODO maybe refactor so it's 1:6, combine y_left and right? so that 
         hold off;
         %TODO: something wrong here!! file names/labels/etc don't match
         %when file counts are off??
-        curr_peak_col = k*i;
         peak_table(curr_peak_col).t = maxtab(:,1);
         peak_table(curr_peak_col).v = v(maxtab(:,3));
         peak_table(curr_peak_col).s = maxtab(:,2);
         peak_table(curr_peak_col).name = col_headers{(curr_peak_col)+1}; %better way?
         size(maxtab(:,1))
+        curr_peak_col = curr_peak_col + 1;
         %TODO - mins as well!!!
         %save maxtab, mintab, and titles
     end
@@ -412,9 +414,14 @@ y = data(:,4);
 %%
 %second csv export - individual peak data for each dimension. so x3 files.
 %but bottom stats same. just data for that dimension.
-for j=1:3
-    col_headers = {'peak #', 'peak time [s]' 'amplitude (peak to trough) [deg]' 'peak velocity of rise (only fall for first point) [deg/s]' 'peak velocity of fall [deg/s]'};
+
+%TODO put left right in one csv?
+for j=1:6
+    col_headers = {'peak #', 'peak time [s]' 'amplitude (peak to trough) [deg]--TODO, currently just position' 'peak velocity of ...fall? (based on foreward velocity calcs) (only fall for first point) [deg/s]'};% 'peak velocity of fall [deg/s]'};
+    %TODO rise/fall has to do with foreward or backward velocity
+    %calculations. do both.
     %col_headers_2 = {'horizontal' 'vertical' 'torsional'};
+    
     col_headers_2 = {'OD' 'OS' 'diff (OD-OS)'};
 %     amplitude_data = {
 %         'Amplitude (peak to trough in [deg]) data:';
@@ -463,18 +470,21 @@ for j=1:3
     fileindex = size(filenamesstruct);
     fileindex = fileindex(1); %will be 0 if there are none of this kind yet
     fid=fopen(strcat(pathname, leading_name, num2str(fileindex), '.csv'),'wt');
+    fprintf(fid, '%s \n', peak_table(j).name);
     fprintf(fid, '%s %.3f\n', 'total time selected (s):', time1-time0);
     %fprintf(fid, '%s %.2f\n', 'total saccades: (need to implement)', sum(saccade_count)); %TODO
 %     for i=1:5
 %         fprintf(fid,'%s,',all_stat_data{i,:}); fprintf(fid,'\n');
 %     end
-    fprintf(fid,'%s,',col_headers{:}, col_headers{:});
+    fprintf(fid,'%s,',col_headers{:});
     fprintf(fid,'\n');
-    num_rows = length(peak_table(i).t);
-    for i=1:num_rows
-        fprintf(fid,'%d,%.3f,%.3f,.%3f', i, peak_table(i).t, peak_table(i).s, peak_table(i).v);
-        fprintf(fid,'\n');
-    end
+    num_rows = length(peak_table(j).t);
+    A = [1:num_rows; peak_table(j).t'; peak_table(j).s'; peak_table(j).v'];
+    fprintf(fid,'%d,%.3f,%.3f,%.3f\n', A);
+%     for i=1:num_rows
+%         fprintf(fid,'%d,%.3f,%.3f,.%3f', i, peak_table(j).t(i), peak_table(j).s(i), peak_table(j).v(i));
+%         fprintf(fid,'\n');
+%     end
     fclose(fid);
 end
 
