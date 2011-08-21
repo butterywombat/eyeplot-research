@@ -13,6 +13,7 @@ end
 
 fid=fopen(fullfile(pathname, filename)); %ask for this later so can do primary gaze. works with Olheiser and Vomund LRUD
 format = '%f %*f %f %*f %*f %f %*f %f %*f %*f %*f %*f %f %*f %*f %f %*f %f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f';
+%time, left horiz, left vert, left tor, right hor, right vert, right tor 	
 data = textscan(fid, format,'HeaderLines',23,'CollectOutput',1, 'treatAsEmpty', 'ÿ'); %I kept the times but each interval is .016-.017 sec constant so unneeded
 data = cell2mat(data);
 data(any(isnan(data), 2), :) = []; %deletes all rows that have a NaN, which were converted from 'ÿ', clever useful matlab parts
@@ -86,6 +87,14 @@ if(~exist(pathname))
     mkdir(pathname);
 end
 
+%%
+%center data around mean
+
+%data = 1time, 2left horiz, 3left vert, 4left tor, 5right horiz, 6right vert,
+%7right tor
+%something wrong here~!!!!!
+all_raw_data = [data(:,1), data(:,3), data(:,2), data(:,6), data(:,5), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
+all_means = mean(all_raw_data(:,2:length(all_raw_data(1,:))));
 %%
 %plotting options for an extra user-specified plot
 %TODO: make the last 2 options the default...
@@ -192,6 +201,7 @@ for k = 1:3 %TODO maybe refactor so it's 1:6, combine y_left and right? so that 
         y = y_both(:,i);
         [maxtab, mintab] = peakdet(y', .5, x');
         plot(x, y,'-',maxtab(:,1),maxtab(:,2),'ro', mintab(:,1), mintab(:,2), 'go', 'linewidth',1);
+        %somehow alternate colors? red/blue
         axis normal; %try auto too. or auto x.
         xlabel(x_axis);
         ylabel(strcat(y_axis, eyes(i)));
@@ -236,9 +246,6 @@ end
 %peakdet, counts for overall thing, then separate velocity outputs
 %center data around means
 
-disp(peak_table);
-
-
 %%
 %for defaults (velocity vs time graphs) set hardcoded for now
 x_left = time;
@@ -277,7 +284,8 @@ end
 %%
 %begin calculating stats and saving data (data table)
 %col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
-all_raw_data=[data(:,1), data(:,3), data(:,2), data(:,6), data(:,3), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
+%all_raw_data=[data(:,1), data(:,3), data(:,2), data(:,6), data(:,5), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
+
 %TODO - maybe fix this so that it is always in this order instead of
 %varying somehow?
 ordered_amps = all_raw_data(:,1:7);
