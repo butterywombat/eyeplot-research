@@ -13,10 +13,14 @@ end
 
 fid=fopen(fullfile(pathname, filename)); %ask for this later so can do primary gaze. works with Olheiser and Vomund LRUD
 format = '%f %*f %f %*f %*f %f %*f %f %*f %*f %*f %*f %f %*f %*f %f %*f %f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f';
-%time, left horiz, left vert, left tor, right hor, right vert, right tor 	
+%1time, 2left horiz, 3left vert, 4left tor, 5right hor, 6right vert, 7right tor 	
 data = textscan(fid, format,'HeaderLines',23,'CollectOutput',1, 'treatAsEmpty', 'ÿ'); %I kept the times but each interval is .016-.017 sec constant so unneeded
 data = cell2mat(data);
 data(any(isnan(data), 2), :) = []; %deletes all rows that have a NaN, which were converted from 'ÿ', clever useful matlab parts
+%data = [data(:,1) data(:,5) data(:,2) data(:,6) data(:,3) data(:,7)
+%data(:,4)]; %nice but cannot do nice case sections in bottom choice
+%selection...
+%data = 1time, 2right hor, 3left hor, 4right vert, 5left vert, 6right tor, 7left tor
 num_rows = length(data(:,1));
 %%
 %todo - could consider doing this AFTER blinks, but then would need to
@@ -30,7 +34,7 @@ for n=1:(num_rows-1);
     v(n,:)=(s(n+1,:)-s(n,:))/(1/60); %1/60 hardcoded time difference between measurements for the goggle system
 end
 %todo deal with left edge! read matlab signal processing sample
-v(num_rows,:) = 0; %not a good number to use.
+v(num_rows,:) = 0; %not a good number to use.  needed?
 %%
 %blink suppression adjustment...
 thres = input('Please input blink suppression threshold in deg/s (0 for none). ');
@@ -52,7 +56,7 @@ end
 time = data(:,1);
 %%
 %time bracketing
-h = plot(time, data(:,2:4), 'b-', time, data(:,5:7), 'r-'); %plots all on one graph just for time bracketing purposes
+h = plot(time, data(:,[2,4,6]), 'b-', time, data(:,[3,5,7]), 'r-'); %uses horiz graphs
 hline(0,'k-'); %need the hline and vline .m function files
 vline(0,'k-');
 title({'Time Bracket';'Click left bound. Hit Enter. Click right bound. Hit Enter. Press enter twice to avoid time bracketing.'});
@@ -92,9 +96,17 @@ end
 
 %data = 1time, 2left horiz, 3left vert, 4left tor, 5right horiz, 6right vert,
 %7right tor
+%1 5 2 6 3 7 4 in s output
 %something wrong here~!!!!!
-all_raw_data = [data(:,1), data(:,3), data(:,2), data(:,6), data(:,5), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
-all_means = mean(all_raw_data(:,2:length(all_raw_data(1,:))));
+%all_raw_data = [data v]; %this is nice but cannot do nice case sections
+%like in the bottom.
+%col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
+%all_raw_data=[data(:,1), data(:,5), data(:,2), data(:,6), data(:,3), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
+
+data_wo_time = data(:,2:length(data(1,:)));
+data(:,2:length(data(1,:))) = bsxfun(@minus,data_wo_time,mean(data_wo_time));
+%all_means = mean(all_raw_data(:,2:length(all_raw_data(1,:))));
+%4 1 5 2 6 3 in v output
 %%
 %plotting options for an extra user-specified plot
 %TODO: make the last 2 options the default...
@@ -103,7 +115,6 @@ menu_options = {'time [s]' 'horiz (left-right) [deg]' 'vert (up-down) [deg]' 'to
 %TODO
 chosen_x = menu('Choose another x for extra graph to plot (eye positions vs time, and velocities vs time, and horiz,vert vs tor (for primary gaze files) plots are automatic)', menu_options);
 chosen_y = [];
-
 %setup x values to plot
 switch chosen_x
     case 0
@@ -283,9 +294,9 @@ end
 
 %%
 %begin calculating stats and saving data (data table)
-%col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
-%all_raw_data=[data(:,1), data(:,3), data(:,2), data(:,6), data(:,5), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
-
+col_headers = {'time [s]' 'right horiz [deg]' 'left horiz' 'right vert' 'left vert' 'right tor' 'left tor' 'right horiz velocity [deg/s] (calculated)' 'left horiz v' 'right vert v' 'left vert v' 'right tor v' 'left tor v'};  
+all_raw_data=[data(:,1), data(:,5), data(:,2), data(:,6), data(:,3), data(:,7), data(:,4), v(:,4), v(:,1), v(:,5), v(:,2), v(:,6), v(:,3)];
+%%
 %TODO - maybe fix this so that it is always in this order instead of
 %varying somehow?
 ordered_amps = all_raw_data(:,1:7);
@@ -325,9 +336,9 @@ ordered_velocities = all_raw_data(:,8:13); %for convenience reference
 %saccade sensitivity
 %TODO: mins too, and of course smoothing!!!
 %test graphs below
-plot(x,y,'.-',peak_table(6).t,peak_table(6).v,'ro','linewidth',1);
-y = data(:,4);
-plot(x,y,'.-',peak_table(6).t,peak_table(6).s,'ro','linewidth',1);
+%plot(x,y,'.-',peak_table(6).t,peak_table(6).v,'ro','linewidth',1);
+%y = data(:,4);
+%plot(x,y,'.-',peak_table(6).t,peak_table(6).s,'ro','linewidth',1);
 
 
 saccade_counts = zeros(1,6);
@@ -336,7 +347,7 @@ for i=1:6
 end
 all_stat_data= {
     'largest range: ' sprintf('%.3f, ',range(all_raw_data(:,2:length(all_raw_data(1,:)))));
-    'mean: ' sprintf('%.3f, ',mean(all_raw_data(:,2:length(all_raw_data(1,:))))); 
+    'mean: (should all be 0 for pos)' sprintf('%.3f, ',mean(all_raw_data(:,2:length(all_raw_data(1,:))))); 
     'stdev: ' sprintf('%.3f, ',std(all_raw_data(:,2:length(all_raw_data(1,:))))); 
     'stderror: ' sprintf('%.3f, ',(std(all_raw_data(:,2:length(all_raw_data(1,:)))))/sqrt(length(time)));
     'saccades/nystagmuses: ' strcat(',,,,,,', sprintf('%d, ',saccade_counts))};
