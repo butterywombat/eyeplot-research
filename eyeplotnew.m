@@ -285,37 +285,6 @@ ordered_velocities = all_raw_data(:,8:13); %for convenience reference
 %ordered_times = time(:,ones(1,6));
 
 %%
-%for defaults (position vs time graphs) set hardcoded for now
-x_left = time;
-x_right = x_left;
-chosen_y = 1:3;
-%gets the y data sets for later plotting, for extra graph
-%TODO refactor since code repeated from top.
-if (chosen_y < 4) %ie 'position' rather than velocity etc picked as y
-    y_left = data(:,chosen_y+1); %since 'time' choice is left out for y, add 1 to correlate with right column in data matrix; thus choice 1 for y correlates to col 2 in data cols
-    y_right = data(:,chosen_y+4); %yleft col + 3 correlates with the same y value type but for right eye instead of left
-else %velocity picked as y
-    y_left = v(:,chosen_y-3); %ex: choose choice 4 = horiz v, thus gets 4-3=1st col of v (left horiz v)
-    y_right = v(:,chosen_y); %ex: 4th choice = 4th col of v (right horiz v)
-end
-for k = 1:3
-    plot(x_left, y_left(:,k), 'b-', x_right, y_right(:,k), 'r-');
-    axis tight; %rescale axes
-    x_axis = menu_options(1); %time label
-    xlabel(x_axis);
-    y_axis = menu_options(k+1); %+1 since menu options still includes time first.
-    ylabel(y_axis);
-    h = strcat(filename, ': ', y_axis, '-vs-', x_axis);
-    title(h);
-    hline(0,'k-'); %need the hline and vline .m function files
-    vline(0,'k-');
-    leading_name = 'position-vs-time-';
-    filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
-    fileindex = size(filenamesstruct);
-    fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
-    print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
-end
-%%
 % x = time;
 % y = data(:,4);
 % [maxtab, mintab] = peakdet(y', .5, x');
@@ -519,7 +488,57 @@ end
 %  
 % Vomund patient ? size and # of nystagmus dec over time. Can try out on ?no vision? file, should be more pronounced. Velocity spikes threshold 5-50
 % 
-% Patient conditions: Cavernous malformations in brainstem, MS lesions in brainstem
+% Patient conditions: Cavernous malformations in brainstem, MS lesions in
+% brainstem
 
+function [maxtab, mintab]=peakdet(v, delta, x)
+
+maxtab = [];
+mintab = [];
+
+v = v(:); % Just in case this wasn't a proper vector
+
+if nargin < 3
+  x = (1:length(v))';
+else 
+  x = x(:);
+  if length(v)~= length(x)
+    error('Input vectors v and x must have same length');
+  end
+  ind = (1:length(v))'; %added to record indices too, for getting the velocities at those positions
 end
+  
+if (length(delta(:)))>1
+  error('Input argument DELTA must be a scalar');
+end
+
+if delta <= 0
+  error('Input argument DELTA must be positive');
+end
+
+mn = Inf; mx = -Inf;
+mnpos = NaN; mxpos = NaN;
+
+lookformax = 1;
+
+for i=1:length(v)
+  this = v(i);
+  if this > mx, mx = this; mxpos = x(i); mxind = ind(i); end %set when not a min/max--during inc or dec; added ind stuff
+  if this < mn, mn = this; mnpos = x(i); mnind = ind(i); end %"
+  
+  if lookformax
+    if this < mx-delta %if so, means previous pt was a max
+      maxtab = [maxtab ; mxpos mx mxind]; %record max; added mxind
+      mn = this; mnpos = x(i); mnind = ind(i); %added mnind
+      lookformax = 0;
+    end  
+  else
+    if this > mn+delta
+      mintab = [mintab ; mnpos mn mnind];
+      mx = this; mxpos = x(i); mxind = ind(i);
+      lookformax = 1;
+    end
+  end
+end
+
 
