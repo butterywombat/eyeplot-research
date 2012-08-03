@@ -2,7 +2,7 @@ function [ output_args ] = eyeplot( input_args )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 hold off;
-filterspec = '~/Desktop/school/eye research/pt exports/*.txt'; %set default dir and filetype
+filterspec = '~/Documents/pt exports/*.txt'; %set default dir and filetype
 [filename, pathname, filterindex] = uigetfile(filterspec);
 if isequal(filename,0)
    disp('User selected Cancel')
@@ -59,10 +59,10 @@ time = data(:,1);
 h = plot(time, data(:,[2,4,6]), 'b-', time, data(:,[3,5,7]), 'r-'); %uses horiz graphs
 hline(0,'k-'); %need the hline and vline .m function files
 vline(0,'k-');
-title({'Time Bracket';'Click left bound. Hit Enter. Click right bound. Hit Enter. Press enter twice to avoid time bracketing.'});
-[x,y] = ginput;    
+title({'Time Bracket';'Click left bound. Click right bound. Press enter twice to avoid time bracketing.'});
+[x,y] = ginput(1);    
 time0 = x; %need round(x)?
-[x,y] = ginput;
+[x,y] = ginput(1);
 time1 = x;
 if (isempty(time0) || time0 < 0 || time0 >= time(length(time)))%if user didn't click bounds/bounds exceeded, do not time bracket
     time0 = 0;
@@ -85,12 +85,24 @@ data = data(idx0:idx1,:);
 v = v(idx0:idx1,:);
 time = data(:,1); %update time, using as a contant name convenience only
 
-pathname = strcat(pathname,'figures/');
-%if figures folder doesn't exist, create it
+%pathname = strcat(pathname,'figures/');
+%%if figures folder doesn't exist, create it
+%if(~exist(pathname))
+%    mkdir(pathname);
+%end
+
+%filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
+disp(strcat('pathname is', pathname));
+filenamesstruct = dir(strcat(pathname, 'figures*'));
+disp(filenamesstruct);
+fileindex = size(filenamesstruct);
+disp(fileindex);
+fileindex = fileindex(1); %will be 0 if there are no figures folders yet
+pathname = strcat(pathname, 'figures', num2str(fileindex), '/');
+disp(pathname);
 if(~exist(pathname))
     mkdir(pathname);
 end
-
 %%
 %center data around mean
 
@@ -159,10 +171,8 @@ if chosen_x ~= 8 %if x is not special case plot, show extra plot y menu and then
     hline(0,'k-'); %need the hline and vline .m function files
     vline(0,'k-');
     leading_name = 'extra-figure-';
-    filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
-    fileindex = size(filenamesstruct);
-    fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
-    print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
+    print(strcat(pathname, leading_name),'-dtiff','-r300');
+    %print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
 end
 
 %%
@@ -200,11 +210,12 @@ for k = 1:3 %TODO maybe refactor so it's 1:6, combine y_left and right? so that 
     hline(0,'k-'); %need the hline and vline .m function files
     vline(0,'k-');
     leading_name = 'position-vs-time-';
-    filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
-    fileindex = size(filenamesstruct);
-    fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
-    print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
-    
+    %filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
+    %fileindex = size(filenamesstruct);
+    %fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
+    %print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
+    print(strcat(pathname, leading_name, num2str(k)),'-dtiff','-r300');
+
     y_both = [y_right(:,k), y_left(:,k)];
     eyes = {' RIGHT' ' LEFT'};
     for i = 1:2 %right eye, left eye
@@ -285,11 +296,11 @@ for k = 1:3
     %save based on # of 'velocity-vs-time' files, so will always add on
     %instead of overwrite. same with other figures saved.
     leading_name = 'velocity-vs-time-';
-    filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
-    fileindex = size(filenamesstruct);
-    fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
+    %filenamesstruct = dir(strcat(pathname, leading_name,'*.tif'));
+    %fileindex = size(filenamesstruct);
+    %fileindex = fileindex(1); %will be 0 if there are no figures of this kind yet
     %match = strncmp(leading_name, name, length(leading_name));
-    print(strcat(pathname, leading_name, num2str(fileindex)),'-dtiff','-r300');
+    print(strcat(pathname, leading_name, num2str(k)),'-dtiff','-r300');
 end
 
 %%
@@ -355,11 +366,8 @@ all_stat_data= {
 %following manipulation in order to write strings (col
 %headers) to a csv file, which can be opened using excel directly. this writes an extra , at the end of each row, but
 %easier to understand
-leading_name = 'all-data-';
-filenamesstruct = dir(strcat(pathname, leading_name,'*csv'));
-fileindex = size(filenamesstruct);
-fileindex = fileindex(1); %will be 0 if there are none of this kind yet
-fid=fopen(strcat(pathname, leading_name, num2str(fileindex), '.csv'),'wt');
+
+fid=fopen(strcat(pathname, 'all-data', '.csv'),'wt');
 fprintf(fid, '%s %.3f\n', 'total time selected (s):', time1-time0);
 %TODO: right now just adding all saccades - but should just add together
 %tor or horiz/vert right?
